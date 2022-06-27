@@ -1,0 +1,88 @@
+exp_name: ucf_c1_run1
+
+random_seed: 200
+mode: train
+method: 'AutoDeepFuse'
+use_cuda: True
+save_chp_freq: 1
+
+network:
+    arch: resnet18
+    #availabel archs: {resnet18,octresnet18,resnet50,resnext50_32x4d,...}
+    arch_rgb: resnet2p1d50
+    arch_flow: resnext101
+    arch_pose: resnet18
+    pretrained: True
+    
+    arch_search:
+        temporal: True
+        channels: 512
+        cells: 1
+        nodes: 4
+        multiplier: 4
+        arch_weight_decay: 0.001
+        arch_learning_rate: 0.0003
+
+datasets:
+    num_class: 101
+    input_size: 112
+    name: 'UCF101'
+    val_split: 1
+    num_workers: 0 #20
+    data_root: ''
+    data_annot_path: "/home/ahnj/repo/AutoDeepFuse/datasets/ucfTrainTestlist/"
+    #data_annot_path: "/misc/lmbssd/zolfagha/datasets/hmdb51_all/hmdb51_1.json"
+    rgb_flow_path: "/home/ahnj/repo/AutoDeepFuse/data/UCF101/denseflow_tvl1/"
+    pose_path: "/home/ahnj/repo/AutoDeepFuse/data/UCF101/DB_pose_OrgFrm/"
+    limit: false
+
+finetune:
+    f_rgb_path: '/home/ahnj/repo/AutoDeepFuse/pretrained_models/resnet/r2p1d50_K_200ep.pth'
+    f_flow_path: '/home/ahnj/repo/AutoDeepFuse/pretrained_models/MARS/Flow_Kinetics_16f.pth'
+    f_pose_path: '/home/ahnj/repo/AutoDeepFuse/pretrained_models/resnet/r3d18_K_200ep.pth'
+    f_rgb_nclass: 700
+    f_flow_nclass: 400
+    f_pose_nclass: 700
+
+testing:
+    model: ''
+
+logging:
+    log_dir_pre: 'experiments/UCF101'
+    model_dir_pre: 'experiments/UCF101'
+    print_step: 10
+    
+training:
+
+    finetune: ' '
+    num_print_epoch: 10
+    batch_size: 32
+    num_epochs_search: 50
+    num_epochs_train: 70
+    num_segments: 64
+    loss_func: "CrossEntropy"
+    clip_gradient: 40
+    itersize: 2
+    dropout: 0
+
+    val_step: 2
+
+
+    optimizer:
+      name: 'sgd'  #'sgd'
+      lr: 0.002  #0.001
+      weight_decay: 0.0003
+      lr_decay: 0.1
+      momentum: 0.9
+      nesterov: true
+    lr_scheduler:
+      name: cosine_annealing #exp_lr #cosine_annealing #poly_lr #multi_step
+      T_max_search: 50
+      T_max_train: 70
+    src_aux_weight: 0.0
+    tar_aux_weight: 0.0
+    tar_entropy_weight: 0.0
+    only_non_scrambled: true
+
+    
+    
